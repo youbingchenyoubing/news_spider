@@ -29,7 +29,7 @@
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{request.session.user.username}} <span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
                   {% if request.session.user.role == "0" %}
-                    <li><a href="#">重新训练模型</a></li>
+                    <li><a href="/system_setting_page">系统设定</a></li>
                      <li><a href="/userlist">用户管理</a></li>
                      <li class="divider"></li>
                   {% endif %}

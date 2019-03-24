@@ -7,13 +7,14 @@ from es import ES
 from django.http import HttpResponse 
 from django.views.decorators.csrf import csrf_exempt
 import pdb
-
+import traceback
 
 mongodb_path = os.path.join(os.path.dirname(__file__),os.pardir,os.pardir)
 sys.path.append(mongodb_path)
+from news_mongodb.tags_dao import TagsDAO
 from news_mongodb.user_dao import UserDAO
 from news_mongodb.article_dao import ArticleDAO
-from news_mongodb.tags_dao import TagsDAO
+from news_mongodb.system_setting import SystemSetting
 from news_mongodb.models.user import User
 from django.shortcuts import render
 from django.conf import settings
@@ -87,86 +88,169 @@ def index(request):
     tagList = tagDAO.tagList()
     #print tagList
     return render(request, 'index.html', {
-     "current_page":0, "webs":["xlw","rmw","zhw"], "page_size": 20,"tagList":json.dumps(tagList)})
+     "current_page":0, "webs":["xlw","rmw","zhw"], "page_size": 20,"tagList":json.dumps(tagList),"tagList2":tagList})
 
 
 @csrf_exempt
 @login_interceptor
 def search(request):
-    logging.info("search(request)")
-    #pdb.set_trace()
-    # 当前页
-    if 'current_page' in request.POST:
-        current_page = int(request.POST['current_page'])
-    else:
-        current_page = 0
-    
-    # 文章抓取网站
-    webMap = {"xlw":"新浪网", "xhs":"新华社","fhw":"凤凰网"} #"rmw":"人民网","zhw":"中华网",
-    if 'webs' in request.POST:
-        str_webs = request.POST['webs']
-        str_webs = str_webs.split(",")
-        webs = []
-        for i in range(len(str_webs)):
-            key = str_webs[i]
-            webs.append(webMap[key])
-    else:
-        webs = ["新浪网","新华网","凤凰网"] #"人民网", "中华网",
-        str_webs = ["xlw","xhs","fhw"] #"rmw","zhw",
-  
-    # 每页显示的页数
-    if "page_size" in request.POST:
-        page_size = request.POST['page_size']
-        page_size = int(page_size)
-    else:
-        page_size = 20
+    try:
+        logging.info("search(request)")
+        #pdb.set_trace()
+        # 当前页
+        if 'current_page' in request.POST:
+            current_page = int(request.POST['current_page'])
+        else:
+            current_page = 0
+        
+        # 文章抓取网站
+        webMap = {"xlw":"新浪网", "xhs":"新华社","fhw":"凤凰网"} #"rmw":"人民网","zhw":"中华网",
+        if 'webs' in request.POST:
+            str_webs = request.POST['webs']
+            str_webs = str_webs.split(",")
+            webs = []
+            for i in range(len(str_webs)):
+                key = str_webs[i]
+                webs.append(webMap[key])
+        else:
+            webs = ["新浪网","新华网","凤凰网"] #"人民网", "中华网",
+            str_webs = ["xlw","xhs","fhw"] #"rmw","zhw",
 
-    if "timerange" in request.POST:
-        timerange = request.POST['timerange']
-        timerange = timerange.split(" - ")
-        startTime = timerange[0]
-        endTime = timerange[1]
-    else:
-        startTime = '2017-01-11'
-        endTime = '2017-01-15'
-        timerange = startTime + " - " + endTime
+        # 标签
+        if "tags" in request.POST:
+            str_tags = request.POST['tags']
+            print str_tags
+            tags = str_tags.split(",")
+        else:
+            tags = []
 
-    # 是否去重
-    if "article_db" in request.POST:
-        article_db = request.POST['article_db']
-        article_db = int(article_db)
-    else:
-        article_db = 0
+        if '' in tags:
+            tags.remove('')
+        print "tags:",tags
 
-    if "label_state" in request.POST:
-        label_state = request.POST['label_state']
-        label_state = int(label_state)
-    else:
-        label_state = 0
+      
+        # 每页显示的页数
+        if "page_size" in request.POST:
+            page_size = request.POST['page_size']
+            page_size = int(page_size)
+        else:
+            page_size = 20
 
+        if "timerange" in request.POST:
+            timerange = request.POST['timerange']
+            timerange = timerange.split(" - ")
+            startTime = timerange[0]
+            endTime = timerange[1]
+        else:
+            startTime = '2017-01-11'
+            endTime = '2017-01-15'
+            timerange = startTime + " - " + endTime
 
-    if "label" in request.POST:
-        label = request.POST['label']
-    else:
-        label = "1"
-   
-    #label = labelMap[label]
-    articleDAO = ArticleDAO('articles_testN')
-    
-    user = request.session.get('user',default=None)
-    if label_state == 1 and user['role'] == "1":
-        condition = {"article_source":webs, "article_db":article_db, "article_label_state":label_state, "startTime": startTime,
-         "endTime":endTime, "current_page":current_page , "page_size":page_size,"update_student":user["username"],"article_label":label}
-    else:
-        condition = {"article_source":webs, "article_db":article_db, "article_label_state":label_state, "startTime": startTime,
-         "endTime":endTime, "current_page":current_page , "page_size":page_size,"article_label":label}
-    #es = ES()
-    #articleList = es.article_search_list(condition)
-    logging.info("[search] condition=" + str(condition))
-    articleList = articleDAO.article_search_list(condition)
-    logging.info("[search] len(result)=" + str(len(articleList)))
+        # 是否去重
+        if "article_db" in request.POST:
+            article_db = request.POST['article_db']
+            article_db = int(article_db)
+        else:
+            article_db = 0
+
+        if "label_states" in request.POST:
+            label_states = request.POST['label_states']
+            str_label_states = label_states.split(",")
+            label_state = []
+            for i in range(len(str_label_states)):
+                label_state.append(int(str_label_states[i]))
+        else:
+            label_state = [0,1,2]
+        print "label_state:", label_state
+
+        if "timerange_check" in request.POST:
+            timerange_check = request.POST["timerange_check"]
+            timerange_check = int(timerange_check)
+        else:
+            timerange_check = 0
+
+        print "timerange_check", timerange_check
+
+        if "label" in request.POST:
+            label = request.POST['label']
+            str_labels = label.split(",")
+            label = []
+            for i in range(len(str_labels)):
+                label.append(int(str_labels[i]))
+        else:
+            label = [0, 1]
+
+        print "label", label
+        if "search_key" in request.POST:
+            search_key = request.POST['search_key'].strip()
+        else:
+            search_key = None
+
+        if "search_type" in request.POST:
+            search_type = request.POST['search_type'].strip()
+        else:
+            search_type = "simple_search"
+
+        print "search_key:",search_key
+        print "search_type",search_type
+
+        #label = labelMap[label]
+        
+        user = request.session.get('user',default=None)
+        if 1 in label_state and user['role'] == "1":
+            condition = {"article_source":webs, 
+            "article_db":article_db, 
+            "article_label_state":label_state,
+             "startTime": startTime,
+             "endTime":endTime, 
+             "current_page":current_page, 
+             "page_size":page_size,
+             "update_student":user["username"],
+             "article_label":label,
+             "tags":tags, 
+             "timerange_check":timerange_check,
+             "search_type": search_type}
+        else:
+            condition = {"article_source":webs, 
+            "article_db":article_db, 
+            "article_label_state":label_state, 
+            "startTime": startTime,
+             "endTime":endTime, 
+             "current_page":current_page , 
+             "page_size":page_size,
+             "article_label":label,
+             "tags":tags, 
+             "timerange_check":timerange_check,
+             "search_type": search_type}
+        
+        print "condition:", condition
+        logging.info("[search] condition=" + str(condition))
+        
+        system_setting = SystemSetting()
+        # databases = system_setting.get("databases", "mongodb")
+        # print "databases:",databases
+
+        if search_key == None or search_key.strip() == "":
+            print "mongodb "
+            articleDAO = ArticleDAO('articles_testN')
+            articleList = articleDAO.article_search_list(condition)
+        else:
+            print "elastic search "
+            es = ES()
+            if search_type == "simple_search":
+                articleList = es.article_simple_search(condition, search_key)
+            else:
+                articleList = es.article_search_list(condition, search_key)
+            
+
+        logging.info("[search] len(result)=" + str(len(articleList)))
+    except BaseException, e:
+        logging.error(e)
+        print e
+        print traceback.print_exc()
+        articleList = []
+
     return HttpResponse(json.dumps(articleList), content_type="application/json")  
-
 
 @login_interceptor
 @admin_interceptor
@@ -281,11 +365,15 @@ def addArticleTag(request):
         tag = request.GET['tag']
         #label = labelMap[label] ####
         articleDAO = ArticleDAO('articles_testN')
-        flag = articleDAO.addTag(article_id, tag)
-        if flag:
-            message = "success"
-        else:
-            message = "failed"
+        flag, update = articleDAO.addTag(article_id, tag)
+        
+        message = "success"
+        url = "http://localhost:9200/news_spider_db/articles_testN/" + str(article_id) + "/_update"
+        es = ES()
+        doc = {"doc": update}
+        # 更新
+        result = es.post(url, doc)
+        print result
         return HttpResponse(json.dumps(message), content_type="application/json")
     except BaseException, e:
         logging.error(e)
@@ -300,14 +388,22 @@ def removeArticleTag(request):
         #label = labelMap[label] ####
         print "removeArticleTag"
         articleDAO = ArticleDAO('articles_testN')
-        flag = articleDAO.removeTag(article_id, tag)
-        if flag:
-            message = "success"
-        else:
-            message = "failed"
+        flag, update = articleDAO.removeTag(article_id, tag)
+
+        url = "http://localhost:9200/news_spider_db/articles_testN/" + str(article_id) + "/_update"
+        print url
+        es = ES()
+        doc = {"doc": update}
+        # print doc
+        # 更新
+        result = es.post(url, doc)
+        #print "remove aticle result:",result
+        message = "success"
         return HttpResponse(json.dumps(message), content_type="application/json")
     except BaseException, e:
         logging.error(e)
+        print e
+        print traceback.print_exc()
         return HttpResponse(json.dumps("failed"), content_type="application/json")
 
 
@@ -328,7 +424,7 @@ def changeLabel(request):
         article.pop("_id")
         article.pop("id")
         article['article_label'] = int(rLabel)
-        user = request.session.get('user',default=None)
+        user = request.session.get('user', default=None)
 
         if user['role'] == "0":
             article['article_label_state'] = 2
@@ -339,7 +435,14 @@ def changeLabel(request):
         
         #article['article_label_state'] = 0
         result = articleDAO.update_article(article_id, article)
+
+        url = "http://localhost:9200/news_spider_db/articles_testN/" + str(article_id) + "/_update"
+        es = ES()
+        doc = { "doc": {"article_label": int(rLabel)}}
+        # 更新
+        es.post(url, doc)
         logging.info("[changeLabel] result=" + str(result))
+
         if result:
             return HttpResponse(json.dumps('{"label":"'+str(rLabel)+'","article_id":"'+str(article_id)+'"}'),
          content_type="application/json")
@@ -370,6 +473,16 @@ def approval(request):
         
         #article['article_label_state'] = 0
         result = articleDAO.update_article(article_id, article)
+
+
+        url = "http://localhost:9200/news_spider_db/articles_testN/" + str(article_id) + "/_update"
+        es = ES()
+        doc = { "doc": {"article_label_state": article['article_label_state'],
+               "update_admin":article['update_admin'], 
+               "update_student": article['update_student']}}
+        # 更新
+        es.post(url, doc)
+
         if result:
             return HttpResponse(json.dumps("success"),content_type="application/json")
         else:
@@ -377,6 +490,34 @@ def approval(request):
     except BaseException, e:
         logging.error(e)
         return HttpResponse(json.dumps("failed"),content_type="application/json")
+
+
+@login_interceptor
+@admin_interceptor
+def system_setting_page(request):
+    system_setting = SystemSetting()
+    databases = system_setting.get("databases", "mongodb")
+    #系统设置页面
+    return render(request, 'system_setting.html',{"databases":databases})
+
+@csrf_exempt
+@login_interceptor
+@admin_interceptor
+def system_setting(request):
+    if "databases" in request.POST:
+        databases = request.POST['databases']
+    else:
+        databases = "mongodb"
+
+    system_setting = SystemSetting()
+    system_setting.put("databases", databases)
+
+    #系统设置页面
+    return render(request, 'system_setting.html',{"message":"保存成功",
+        "databases":databases})
+
+
+
         
 
 

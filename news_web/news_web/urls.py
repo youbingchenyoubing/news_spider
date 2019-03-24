@@ -21,5 +21,7 @@ urlpatterns = [
     url(r'^removeArticleTag', news_web_view.removeArticleTag, name='removeArticleTag'),
     url(r'^changeLabel', news_web_view.changeLabel, name='changeLabel'),
     url(r'^approval', news_web_view.approval, name='approval'),
+    url(r'^system_setting_page', news_web_view.system_setting_page, name='system_setting_page'),
+    url(r'^system_setting', news_web_view.system_setting, name='system_setting'),
     url(r'^admin/', include(admin.site.urls)),
 ]
