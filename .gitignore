@@ -1,0 +1,9 @@
+*.pyc
+*.h5
+*.log
+*.cfg
+*result
+*.sqlite3
+*.timestamp
+*.pdf
+.idea
