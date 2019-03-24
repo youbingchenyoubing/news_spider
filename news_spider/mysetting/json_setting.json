@@ -1,0 +1,37 @@
+{
+	"人民网":{
+		"urls":{
+			"北京": "http://bj.people.com.cn/GB/233115/index.html",
+			"天津": "http://tj.people.com.cn/GB/375887/index.html"
+		},
+		"link_xpath":"",
+		"prefix_link":"",
+		"last_link":"",
+		"totalpage_xpath":"",
+		"nextpage_xpath":"",
+		"deal_Class":"",
+		"content":{
+			"title_xpath":"",
+			"publish_time_xpath":"",
+			"source_xpath":"",
+			"content_xpath":""
+		}
+	},
+	"新华社":{
+		"urls":{
+			"中国":"202.204.214.100/Search?columnid=e0101&titlelist=/tmpl/titlelist.jsp"
+		},
+		"link_xpath":"",
+		"prefix_link":"",
+		"last_link":"",
+		"totalpage_xpath":"",
+		"nextpage_xpath":"",
+		"deal_Class":"",
+		"content":{
+			"title_xpath":"",
+			"publish_time_xpath":"",
+			"source_xpath":"",
+			"content_xpath":""
+		}
+	}
+}

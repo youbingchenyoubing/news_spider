@@ -1,0 +1,1 @@
+MONGO_LOG_FILE = '/home/developMent/data/dbLog/mongodb_log_'

@@ -1,0 +1,14 @@
+﻿{
+
+    "content_xpath":"//*[@id='artibody']",
+    "re_spider_page":100,
+    "extract_condition":{"article_publish_time":"","article_url":[{"$regex":"^http://video.sina.com.cn"}]},
+    "record_log":"/home/developMent/data/ReSpiderLog/re_spider.log",
+    "user_agent_file":"/home/developMent/news_spider/news_spider/mysetting/useragent.json",
+    "video_info":"//div[@class='vd_vedioinfo']",
+    "timeout":10,
+    "start_time":"2009-12-31",
+    "stop_time":"2009-12-31",
+    "body_xpath":"/html"
+    
+}
