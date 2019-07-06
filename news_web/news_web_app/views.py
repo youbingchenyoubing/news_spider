@@ -1,5 +1,6 @@
 #coding=utf-8
 #from user_dao import UserDAO
+
 import sys
 import os
 import json  
@@ -229,7 +230,8 @@ def search(request):
         system_setting = SystemSetting()
         # databases = system_setting.get("databases", "mongodb")
         # print "databases:",databases
-
+        
+        #pdb.set_trace()
         if search_key == None or search_key.strip() == "":
             print "mongodb "
             articleDAO = ArticleDAO('articles_testN')
