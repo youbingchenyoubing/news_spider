@@ -312,8 +312,8 @@ class ES(object):
             #print traceback.print_exc()
             return None   
 
-#es = ES()
-#print es.get("http://localhost:9200/news_spider_db/articles_testP/_search",{"query":{"match":{"simhash":"1855271740191983003"}}})
+es = ES()
+print es.get("http://localhost:9200/news_spider_db/articles_testP/_search",{"query":{"match":{"simhash":"1855271740191983003"}}})
 #print es.put("http://localhost:9200/news_spider_db/articles_testN/1",{"name":"zjl"})
 
 
