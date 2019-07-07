@@ -259,6 +259,8 @@ class ES(object):
 	    jdata = json.dumps(values) 
 	    # 生成页面请求的完整数据
             req = urllib2.Request(url, jdata)
+	    # 6.4 新特性
+	    req.add_header('Content-Type', 'application/json')
             # 发送页面请求 
             response = urllib2.urlopen(req) 
             # 获取服务器返回的页面信息
