@@ -16,3 +16,12 @@ https://www.elastic.co/guide/en/elasticsearch/reference/6.4/docker.html
 curl http://localhost:9200/news_spider_db/articles_testN/_search
 curl http://localhost:9200/news_spider_db/articles_testP/_search
 ```
+
+### keras 
+```
+sudo pip install numpy
+sudo pip install keras==1.1.2
+sudo pip install h5py
+sudo pip install Cython
+sudo pip install word2vec
+```
