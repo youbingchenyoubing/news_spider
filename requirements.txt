@@ -27,7 +27,7 @@ kerberos==1.1
 kitchen==1.1.1
 kmod==0.1
 langtable==0.0.31
-lxml==3.2.1
+lxml==4.6.5
 netaddr==0.7.5
 ntplib==0.3.2
 perf==0.1
